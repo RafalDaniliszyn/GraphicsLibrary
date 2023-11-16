@@ -3,6 +3,7 @@ package org.daniliszyn;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 
 public class Cube {
@@ -16,7 +17,7 @@ public class Cube {
 
   public Cube(double x, double y, double z, double width, double height, double depth) {
     rec1 = new Rectangle(x, y, z, width, height, Color.BLACK, "sciana przod");
-    rec2 = new Rectangle(x, y, z + depth, width, height, Color.GRAY, "sciana tyl");
+    rec2 = new Rectangle(x, y, z + depth, width, height, Color.RED, "sciana tyl");
 
     rec3 = new Rectangle(x, y, z + depth, width, height, Color.BLUE, "dach gora");
     rec3.rotate(90, 0, 0, new double[][]{
@@ -25,19 +26,19 @@ public class Cube {
             {z + (depth/2)}
     });
 
-    rec4 = new Rectangle(x, y , z + depth, width, height, Color.BLUE, "dach dol");
+    rec4 = new Rectangle(x, y , z + depth, width, height, Color.GRAY, "dach dol");
     rec4.rotate(270, 0, 0, new double[][]{
             {x + (width/2)},
             {y + (height/2)},
             {z + (depth/2)}
     });
-    rec5 = new Rectangle(x, y, z, width, height, Color.RED, "sciana lewa");
+    rec5 = new Rectangle(x, y, z, width, height, Color.GREEN, "sciana lewa");
     rec5.rotate(0, 270, 0,  new double[][]{
             {x + (width/2)},
             {y + (height/2)},
             {z + (depth/2)}
     });
-    rec6 = new Rectangle(x, y, z, width, height, Color.RED, "sciana prawa");
+    rec6 = new Rectangle(x, y, z, width, height, Color.CYAN, "sciana prawa");
     rec6.rotate(0, 90, 0,  new double[][]{
             {x + (width/2)},
             {y + (height/2)},
@@ -45,22 +46,20 @@ public class Cube {
     });
   }
 
-  public void display(Graphics g, int OFFSET) {
+  public void display(Graphics g) {
     for (Rectangle rectangle : getDisplayOrder(getRectangles())) {
       g.setColor(rectangle.getColor());
-      g.drawString(String.valueOf(rectangle.getV1().getZ()), (int) rectangle.getV1().getX() + OFFSET, (int) rectangle.getV1().getY() + OFFSET);
-      rectangle.display(g, OFFSET);
-      rectangle.displayCoordinates(g, OFFSET);
+      rectangle.display(g);
     }
   }
 
   public void moveTest(double x, double y, double z) {
-    rec1.moveTest(x, y, z);
-    rec2.moveTest(x, y, z);
-    rec3.moveTest(x, y, z);
-    rec4.moveTest(x, y, z);
-    rec5.moveTest(x, y, z);
-    rec6.moveTest(x, y, z);
+    rec1.translate(x, y, z);
+    rec2.translate(x, y, z);
+    rec3.translate(x, y, z);
+    rec4.translate(x, y, z);
+    rec5.translate(x, y, z);
+    rec6.translate(x, y, z);
   }
 
   public void rotate(int angleX, int angleY, int angleZ, double[][] rotationPoint) {
@@ -72,17 +71,12 @@ public class Cube {
     rec6.rotate(angleX, angleY, angleZ, rotationPoint);
   }
 
-  public void rotate(int angleX, int angleY, int angleZ) {
-    rec1.rotate(angleX, angleY, angleZ);
-    rec2.rotate(angleX, angleY, angleZ);
-    rec3.rotate(angleX, angleY, angleZ);
-    rec4.rotate(angleX, angleY, angleZ);
-    rec5.rotate(angleX, angleY, angleZ);
-    rec6.rotate(angleX, angleY, angleZ);
-  }
-
   private Rectangle[] getDisplayOrder(Rectangle[] rectangles) {
-    Arrays.sort(rectangles, Comparator.comparingDouble(o -> o.getV1().getPoint3D()[2][0]));
+    Arrays.sort(rectangles, Comparator.comparingDouble(o -> {
+        return o.getV1().getZ() + o.getV2().getZ() + o.getV3().getZ() + o.getV4().getZ();
+      }
+    ));
+    Collections.reverse(Arrays.asList(rectangles));
     return rectangles;
   }
 
