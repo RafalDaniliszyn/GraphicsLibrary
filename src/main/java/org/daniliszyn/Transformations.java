@@ -1,8 +1,10 @@
 package org.daniliszyn;
 
-public class Transform {
+import static org.daniliszyn.ViewProperties.*;
 
-  public static double[][] translation(double x, double y, double z, double[][] point) {
+public class Transformations {
+
+  public static double[][] translate(double x, double y, double z, double[][] point) {
     double[][] matrix = {
             {1.0, 0.0, 0.0, x},
             {0.0, 1.0, 0.0, y},
@@ -15,7 +17,7 @@ public class Transform {
             {point[2][0], 0, 0, 0},
             {1.0        , 0, 0, 0}
     };
-    double[][] result = multiply(matrix, m1, 4);
+    double[][] result = MatrixMath.multiply(matrix, m1, 4);
     m1 = new double[][]{
             {result[0][0], 0, 0, 0},
             {result[1][0], 0, 0, 0},
@@ -38,7 +40,7 @@ public class Transform {
     return point;
   }
 
-  public static double[][] rotateX(int angle, double[][] point, double[][] rotationPoint) {
+  private static double[][] rotateX(int angle, double[][] point, double[][] rotationPoint) {
     if (rotationPoint == null) {
       rotationPoint = new double[][] {
               {0},
@@ -55,7 +57,7 @@ public class Transform {
             {0.0, 0.0, 0.0, 1}
     };
 
-    double[][] origin = Transform.translation(-rotationPoint[0][0], -rotationPoint[1][0], -rotationPoint[2][0], point);
+    double[][] origin = Transformations.translate(-rotationPoint[0][0], -rotationPoint[1][0], -rotationPoint[2][0], point);
 
     double[][] m1 = {
             {origin[0][0], 0.0, 0.0, 0.0},
@@ -64,7 +66,7 @@ public class Transform {
             {0.0, 0.0, 0.0, 1.0}
     };
 
-    double[][] result = multiply(xMatrix, m1, 4);
+    double[][] result = MatrixMath.multiply(xMatrix, m1, 4);
 
     double[][] m2 = {
             {result[0][0], 0, 0, 0},
@@ -73,10 +75,10 @@ public class Transform {
             {1.0         , 0, 0, 0}
     };
 
-    return Transform.translation(rotationPoint[0][0], rotationPoint[1][0], rotationPoint[2][0], m2);
+    return Transformations.translate(rotationPoint[0][0], rotationPoint[1][0], rotationPoint[2][0], m2);
   }
 
-  public static double[][] rotateY(int angle, double[][] point, double[][] rotationPoint) {
+  private static double[][] rotateY(int angle, double[][] point, double[][] rotationPoint) {
     if (rotationPoint == null) {
       rotationPoint = new double[][] {
               {0},
@@ -92,7 +94,7 @@ public class Transform {
             {sin*-1, 0, cos, 0},
             {0, 0, 0, 1}
     };
-    double[][] origin = Transform.translation(-rotationPoint[0][0], -rotationPoint[1][0], -rotationPoint[2][0], point);
+    double[][] origin = Transformations.translate(-rotationPoint[0][0], -rotationPoint[1][0], -rotationPoint[2][0], point);
 
     double[][] m1 = {
             {origin[0][0], 0.0, 0.0, 0.0},
@@ -101,7 +103,7 @@ public class Transform {
             {0.0, 0.0, 0.0, 1.0}
     };
 
-    double[][] result = multiply(yMatrix, m1, 4);
+    double[][] result = MatrixMath.multiply(yMatrix, m1, 4);
 
     double[][] m2 = {
             {result[0][0], 0, 0, 0},
@@ -110,10 +112,10 @@ public class Transform {
             {1.0         , 0, 0, 0}
     };
 
-    return Transform.translation(rotationPoint[0][0], rotationPoint[1][0], rotationPoint[2][0], m2);
+    return Transformations.translate(rotationPoint[0][0], rotationPoint[1][0], rotationPoint[2][0], m2);
   }
 
-  public static double[][] rotateZ(int angle, double[][] point, double[][] rotationPoint) {
+  private static double[][] rotateZ(int angle, double[][] point, double[][] rotationPoint) {
     if (rotationPoint == null) {
       rotationPoint = new double[][] {
               {0},
@@ -129,7 +131,7 @@ public class Transform {
             {0, 0, 1, 0},
             {0, 0, 0, 1}
     };
-    double[][] origin = Transform.translation(-rotationPoint[0][0], -rotationPoint[1][0], -rotationPoint[2][0], point);
+    double[][] origin = Transformations.translate(-rotationPoint[0][0], -rotationPoint[1][0], -rotationPoint[2][0], point);
 
     double[][] m1 = {
             {origin[0][0], 0.0, 0.0, 0.0},
@@ -138,7 +140,7 @@ public class Transform {
             {0.0, 0.0, 0.0, 1.0}
     };
 
-    double[][] result = multiply(zMatrix, m1, 4);
+    double[][] result = MatrixMath.multiply(zMatrix, m1, 4);
 
     double[][] m2 = {
             {result[0][0], 0, 0, 0},
@@ -147,22 +149,34 @@ public class Transform {
             {1.0         , 0, 0, 0}
     };
 
-    return Transform.translation(rotationPoint[0][0], rotationPoint[1][0], rotationPoint[2][0], m2);
+    return Transformations.translate(rotationPoint[0][0], rotationPoint[1][0], rotationPoint[2][0], m2);
   }
 
-  // TODO: 24.08.2023 Wydzielić do innej klasy
-  public static double[][] multiply(double[][] m1, double[][] m2, int matrixSize) {
-    double[][] m3 = new double[matrixSize][matrixSize];
-    for (int i = 0; i < m1[0].length; i++) {
-      for (int i1 = 0; i1 < m1.length; i1++) {
-        double sum = 0;
-        for (int j = 0; j < m1[0].length; j++) {
-          sum += m1[i][j] * m2[j][i1];
-        }
-        m3[i][i1] = sum;
-      }
-    }
-    return m3;
+  public static double[][] scale(double[][] point) {
+    double[][] scaleMatrix = {
+            {(2* NEAR)/(RIGHT - LEFT), 0, (RIGHT + LEFT) / (RIGHT - LEFT), 0},
+            {0, (2 * NEAR) / (TOP - BOTTOM), (TOP + BOTTOM) / (TOP - BOTTOM), 0},
+            {0, 0, -(FAR + NEAR) / (FAR - NEAR), (-2 * FAR * NEAR) / (FAR - NEAR)},
+            {0, 0, -1, 0}
+    };
+    double[][] m1 = {
+            {point[0][0], 0, 0, 0},
+            {point[1][0], 0, 0, 0},
+            {point[2][0], 0, 0, 0},
+            {1          , 0, 0, 0}
+    };
+    double[][] scale = MatrixMath.multiply(m1, scaleMatrix, 4);
+    double xPerspective = scale[0][0]/scale[2][0];
+    double yPerspective = scale[1][0]/scale[2][0];
+
+    double screen_x = ((xPerspective + 1) - Panel.CAMERA[0]) * (1300.0 / 2);
+    double screen_y = ((1 - yPerspective) - Panel.CAMERA[1]) * (800.0 / 2);
+    return new double[][]{
+            {screen_x, 0, 0, 0},
+            {screen_y, 0, 0, 0},
+            {scale[2][0], 0, 0, 0},
+            {0, 0, 0, 1}
+    };
   }
 
 }

@@ -18,15 +18,17 @@ public class Triangle {
     public void display(Graphics g) {
         scale();
 
-        double[] lightDir = new double[] {1.0, -1.0, -1.0};
-        double[] lightNormal = normalize(lightDir);
+        //double[] lightDir = new double[] {0.0, 1.0, 0.0};
+        double[] lightDir = Panel.LIGHT;
+        double[] lightNormal = MatrixMath.normalize(lightDir);
         double[] normal = getNormal();
 
         //LIGHT
-        float lightDot = (float) dotProduct(lightNormal, normal);
+        float lightDot = (float) MatrixMath.dotProduct(lightNormal, normal);
+
         if (lightDot < 0.0) {
             g.setColor(Color.BLACK);
-        } else if (lightDot > 0.0) {
+        } else if (lightDot >= 0.0) {
             g.setColor(new Color(lightDot, lightDot, lightDot));
         }
 
@@ -53,12 +55,10 @@ public class Triangle {
                     },
                     6
             );
-
-//            g.drawLine((int) v1.getX(), (int) v1.getY(), (int) v2.getX(), (int) v2.getY());
-//            g.drawLine((int) v2.getX(), (int) v2.getY(), (int) v3.getX(), (int) v3.getY());
-//            g.drawLine((int) v3.getX(), (int) v3.getY(), (int) v1.getX(), (int) v1.getY());
+            g.drawLine((int) v1.getX(), (int) v1.getY(), (int) v2.getX(), (int) v2.getY());
+            g.drawLine((int) v2.getX(), (int) v2.getY(), (int) v3.getX(), (int) v3.getY());
+            g.drawLine((int) v3.getX(), (int) v3.getY(), (int) v1.getX(), (int) v1.getY());
         }
-
     }
 
     private double[] getNormal() {
@@ -75,29 +75,13 @@ public class Triangle {
                 m2[1][0]-m0[1][0], //y
                 m2[2][0]-m0[2][0]  //z
         };
-        double[] c = new double[] {
-                (a[1]*b[2]) - (a[2]*b[1]),
-                (a[2]*b[0]) - (a[0]*b[2]),
-                (a[0]*b[1]) - (a[1]*b[0])
-        };
-        return normalize(c);
-    }
-
-    private double[] normalize(double[] a) {
-        double m = Math.sqrt((a[0] * a[0]) + (a[1] * a[1]) + (a[2] * a[2]));
-        return new double[] {
-                a[0]/m, a[1]/m, a[2]/m
-        };
-    }
-
-    private double dotProduct(double[] a, double[] b) {
-        return (a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]);
+        return MatrixMath.crossProduct(a, b);
     }
 
     private void scale() {
-        double[][] v1scale = Scale.scale(v1.getPoint3D());
-        double[][] v2scale = Scale.scale(v2.getPoint3D());
-        double[][] v3scale = Scale.scale(v3.getPoint3D());
+        double[][] v1scale = Transformations.scale(v1.getPoint3D());
+        double[][] v2scale = Transformations.scale(v2.getPoint3D());
+        double[][] v3scale = Transformations.scale(v3.getPoint3D());
         v1.setPoint2D(new Point2D.Double(v1scale[0][0], v1scale[1][0]));
         v2.setPoint2D(new Point2D.Double(v2scale[0][0], v2scale[1][0]));
         v3.setPoint2D(new Point2D.Double(v3scale[0][0], v3scale[1][0]));

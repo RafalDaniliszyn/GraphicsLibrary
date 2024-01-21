@@ -8,6 +8,7 @@ public class Frame extends JFrame {
     setSize(1300, 800);
     setContentPane(panel);
     addKeyListener(panel);
+    addMouseListener(panel.mouse);
     setDefaultCloseOperation(EXIT_ON_CLOSE);
     setVisible(true);
   }
